@@ -11,7 +11,7 @@ func ConfigInit() error {
 
 	// 检测配置文件是否存在，不存在使用默认
 	if _, err := os.Stat("config.json"); os.IsNotExist(err) {
-		data, err := json.Marshal(&Config)
+		data, err := json.MarshalIndent(&Config, "", "    ")
 		if err != nil {
 			return err
 		}

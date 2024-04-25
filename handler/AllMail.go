@@ -1,15 +1,19 @@
 package handler
 
 import (
+	"sort"
+
 	"github.com/McaxDev/MailTrans/util"
 	"github.com/emersion/go-imap"
 	"github.com/gin-gonic/gin"
 )
 
 type Email struct {
+	Time    string
 	UID     uint32
 	From    string
 	Subject string
+	Preview string
 }
 
 // 获取所有邮件的handler
@@ -23,26 +27,47 @@ func AllMail(c *gin.Context) {
 	}
 	defer conn.Logout()
 
-	// 获取所有邮件的UID
+	// 创建检索条件变量
 	criteria := imap.NewSearchCriteria()
-	criteria.WithoutFlags = []string{imap.SeenFlag}
+
+	/*
+		// 通过配置文件里的关键词白名单过滤
+		whitelist := config.Config.Filter
+		if len(whitelist) > 0 {
+			orCriteria := make([]*imap.SearchCriteria, len(whitelist))
+			for i, subject := range whitelist {
+				orCriteria[i] = imap.NewSearchCriteria()
+				orCriteria[i].Header.Add("Subject", subject)
+			}
+			criteria.Or = orCriteria
+		}
+	*/
+
+	// 从查询字符串参数获取收件人邮箱过滤条件
+	receiver := c.Query("receiver")
+	if receiver != "" {
+		criteria.Header.Add("To", receiver)
+	}
+
+	// 根据条件搜索满足条件的邮件ID
 	ids, err := conn.UidSearch(criteria)
 	if err != nil {
 		util.Error(c, 500, "从邮件服务器获取邮件UID列表失败", err)
 		return
 	}
 
+	// 对UID进行排序并截取前五个元素
+	sort.Slice(ids, func(i, j int) bool { return ids[i] > ids[j] })
+	if len(ids) > 5 {
+		ids = ids[:5]
+	}
+
 	// 获取邮件的概要信息
-	seqset := new(imap.SeqSet)
-	seqset.AddNum(ids...)
-	items := []imap.FetchItem{imap.FetchEnvelope}
-	messages := make(chan *imap.Message, 10)
-	go func() {
-		if err := conn.UidFetch(seqset, items, messages); err != nil {
-			util.Error(c, 500, "获取邮件的概要信息失败", err)
-			return
-		}
-	}()
+	messages, err := util.GetContent(conn, ids...)
+	if err != nil {
+		util.Error(c, 500, "获取邮件信息失败", err)
+		return
+	}
 
 	// 将邮件列表变成切片
 	var emails []Email
@@ -50,10 +75,16 @@ func AllMail(c *gin.Context) {
 		if msg == nil {
 			continue
 		}
+		preview, err := util.ExtractText(msg)
+		if err != nil {
+			preview = "加载邮件详细信息失败"
+		}
 		email := Email{
+			Time:    msg.Envelope.Date.Format("2006-01-02 15:04"),
 			UID:     msg.Uid,
 			From:    msg.Envelope.From[0].PersonalName,
 			Subject: msg.Envelope.Subject,
+			Preview: preview,
 		}
 		emails = append(emails, email)
 	}

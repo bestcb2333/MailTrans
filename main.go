@@ -48,7 +48,6 @@ func main() {
 
 		//设置路由
 		r.GET("/all", handler.AllMail)
-		r.GET("/mail", handler.SpecificMail)
 		r.Run(":" + config.Config.Port)
 	}()
 

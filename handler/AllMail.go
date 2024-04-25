@@ -30,34 +30,28 @@ func AllMail(c *gin.Context) {
 	// 创建检索条件变量
 	criteria := imap.NewSearchCriteria()
 
-	/*
-		// 通过配置文件里的关键词白名单过滤
-		whitelist := config.Config.Filter
-		if len(whitelist) > 0 {
-			orCriteria := make([]*imap.SearchCriteria, len(whitelist))
-			for i, subject := range whitelist {
-				orCriteria[i] = imap.NewSearchCriteria()
-				orCriteria[i].Header.Add("Subject", subject)
-			}
-			criteria.Or = orCriteria
-		}
-	*/
+	// 仅允许特定的主题关键词的邮件
+	//if len(config.Config.Filter) > 0 {
+	//	criteria.Header.Add("Subject", "("+strings.Join(config.Config.Filter, " OR ")+")")
+	//}
 
-	// 从查询字符串参数获取收件人邮箱过滤条件
+	// 查询字符串参数 收件人
 	receiver := c.Query("receiver")
 	if receiver != "" {
 		criteria.Header.Add("To", receiver)
 	}
 
-	// 根据条件搜索满足条件的邮件ID
+	// 搜索满足条件的邮件UID
 	ids, err := conn.UidSearch(criteria)
 	if err != nil {
 		util.Error(c, 500, "从邮件服务器获取邮件UID列表失败", err)
 		return
 	}
 
-	// 对UID进行排序并截取前五个元素
+	// 对UID进行排序
 	sort.Slice(ids, func(i, j int) bool { return ids[i] > ids[j] })
+
+	// 只截取前五个UID
 	if len(ids) > 5 {
 		ids = ids[:5]
 	}

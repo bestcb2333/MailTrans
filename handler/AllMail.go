@@ -45,7 +45,7 @@ func AllMail(c *gin.Context) {
 	// 查询字符串参数 收件人
 	receiver := c.Query("receiver")
 	if receiver == "" {
-		util.Error(c, 400, "你需要提供一个收件人邮件", nil)
+		util.Error(c, 400, "You have to provide a receiver email.", nil)
 		return
 	}
 	criteria.Header.Add("To", receiver)
@@ -53,7 +53,7 @@ func AllMail(c *gin.Context) {
 	// 搜索满足条件的邮件UID
 	ids, err := conn.UidSearch(criteria)
 	if err != nil {
-		util.Error(c, 500, "从邮件服务器获取邮件UID列表失败", err)
+		util.Error(c, 500, "Failed to fetch uids of emails.", err)
 		return
 	}
 
@@ -68,7 +68,7 @@ func AllMail(c *gin.Context) {
 	// 获取邮件的概要信息
 	messages, err := util.GetContent(conn, ids...)
 	if err != nil {
-		util.Error(c, 500, "获取邮件信息失败", err)
+		util.Error(c, 500, "Failed to fetch summary of email.", err)
 		return
 	}
 
@@ -80,7 +80,7 @@ func AllMail(c *gin.Context) {
 		}
 		preview, err := util.ExtractText(msg)
 		if err != nil {
-			preview = "加载邮件详细信息失败"
+			preview = "Failed to load detailed information of email."
 		}
 		email := Email{
 			Time:    msg.Envelope.Date.Format("2006-01-02 15:04"),
@@ -93,5 +93,5 @@ func AllMail(c *gin.Context) {
 	}
 
 	// 将切片返回
-	c.AbortWithStatusJSON(200, util.Resp("查询成功", emails))
+	c.AbortWithStatusJSON(200, util.Resp("Fetched successfully.", emails))
 }

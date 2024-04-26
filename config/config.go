@@ -12,13 +12,13 @@ type ConfigTemplate struct {
 
 // 配置文件变量
 var Config = ConfigTemplate{
-	Port:         "5678",
+	Port:         "8910",
 	MailSrvIp:    "127.0.0.1",
-	MailSrvPort:  "993",
+	MailSrvPort:  "143",
 	MailAccount:  "",
 	MailPassword: "",
 	Filter: [][2]string{
-		{"您的", "临时访问代码"},
-		{"如何更新", "同户设备"},
+		{"临时", "更新"},
+		{"代码", "同户设备"},
 	},
 }

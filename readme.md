@@ -2,13 +2,13 @@
 ### Port 这个程序运行的端口
     "Port": "5678"
 ### MailSrvIp 邮箱服务器d的地址
-    "MailSrvIp": "mail.ckui.net"
+    "MailSrvIp": "mail.youremail.com"
 ### MailSrvPort 邮箱服务器IMAP端口
     "MailSrvPort": "143"
 ### MailAccount 邮箱账号
-    "MailAccount": "code@ckui.net"
+    "MailAccount": "yourEmail@gmail.com"
 ### 邮箱密码
-    "MailPassword": "Code888123"
+    "MailPassword": "yourPassWord"
 ### 主题筛选器
 * 整个大括号里可以有无限个小括号，每个小括号里只能有两个关键词。
 * 小括号里的两个关键词之间是或者关系，大括号里的小括号之间是并且关系。

@@ -7,7 +7,7 @@ type ConfigTemplate struct {
 	MailSrvPort  string
 	MailAccount  string
 	MailPassword string
-	Filter       []string
+	Filter       [][2]string
 }
 
 // 配置文件变量
@@ -17,8 +17,8 @@ var Config = ConfigTemplate{
 	MailSrvPort:  "993",
 	MailAccount:  "",
 	MailPassword: "",
-	Filter: []string{
-		"您的 Netflix 临时访问代码",
-		"如何更新 Netflix 同户设备",
+	Filter: [][2]string{
+		{"您的", "临时访问代码"},
+		{"如何更新", "同户设备"},
 	},
 }

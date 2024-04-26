@@ -3,6 +3,7 @@ package handler
 import (
 	"sort"
 
+	"github.com/McaxDev/MailTrans/config"
 	"github.com/McaxDev/MailTrans/util"
 	"github.com/emersion/go-imap"
 	"github.com/gin-gonic/gin"
@@ -31,15 +32,23 @@ func AllMail(c *gin.Context) {
 	criteria := imap.NewSearchCriteria()
 
 	// 仅允许特定的主题关键词的邮件
-	//if len(config.Config.Filter) > 0 {
-	//	criteria.Header.Add("Subject", "("+strings.Join(config.Config.Filter, " OR ")+")")
-	//}
+	filter := config.Config.Filter
+	for _, value := range filter {
+		criteriaA := imap.NewSearchCriteria()
+		criteriaA.Header.Add("Subject", value[0])
+		criteriaB := imap.NewSearchCriteria()
+		criteriaB.Header.Add("Subject", value[1])
+		arrayCriteria := [2]*imap.SearchCriteria{criteriaA, criteriaB}
+		criteria.Or = append(criteria.Or, arrayCriteria)
+	}
 
 	// 查询字符串参数 收件人
 	receiver := c.Query("receiver")
-	if receiver != "" {
-		criteria.Header.Add("To", receiver)
+	if receiver == "" {
+		util.Error(c, 400, "你需要提供一个收件人邮件", nil)
+		return
 	}
+	criteria.Header.Add("To", receiver)
 
 	// 搜索满足条件的邮件UID
 	ids, err := conn.UidSearch(criteria)

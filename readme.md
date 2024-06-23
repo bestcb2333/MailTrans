@@ -1,3 +1,6 @@
+this code is a customer's order and I open-sourced it. I made $80 from this source code.
+
+
 ## 后端软件使用方法
 * 在服务器上创建一个文件夹用于存放后端程序，并进入这个文件夹
 ```
